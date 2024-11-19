@@ -3,11 +3,13 @@ import typography from '@tailwindcss/typography';
 
 /** @type {import('tailwindcss').Config} */
 export default {
-	content: ['./src/**/*.{html,js,svelte,ts}'],
-
+	content: ['./src/**/*.{html,js,svelte,ts}'], // Pastikan path ini sesuai dengan proyek Anda
 	theme: {
-		extend: {}
+	  extend: {
+		fontFamily: {
+		  lato: ['Lato', 'sans-serif'], // Tambahkan font Lato
+		},
+	  },
 	},
-
 	plugins: [typography, aspectRatio]
 };

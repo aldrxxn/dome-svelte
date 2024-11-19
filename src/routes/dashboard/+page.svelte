@@ -6,7 +6,7 @@
     function logout() {
       localStorage.removeItem('token');
       alert('Anda telah logout.');
-      goto('/login'); // Redirect ke halaman login setelah logout
+      goto('/'); // Redirect ke halaman login setelah logout
     }
   
     // Proteksi halaman
@@ -14,7 +14,7 @@
       const token = localStorage.getItem('token');
       if (!token) {
         alert('Anda harus login terlebih dahulu.');
-        goto('/login'); // Redirect ke halaman login jika tidak ada token
+        goto('/'); // Redirect ke halaman login jika tidak ada token
         return;
       }
   
@@ -32,18 +32,10 @@
       } catch (error) {
         alert('Sesi Anda telah berakhir. Silakan login ulang.');
         localStorage.removeItem('token');
-        goto('/login');
+        goto('/');
       }
     });
   </script>
-  
-  <style>
-    .dashboard-container {
-      padding: 20px;
-      font-family: Arial, sans-serif;
-      text-align: center;
-    }
-  </style>
   
   <div class="dashboard-container">
     <h1>Selamat Datang di Dashboard</h1>
