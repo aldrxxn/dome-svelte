@@ -41,7 +41,7 @@
   
     // Navigasi ke halaman detail berdasarkan PERNER
     const navigateToDetail = (perner) => {
-      goto(`listKaryawan/detail/${perner}`); // Navigasi ke halaman /detail/:perner
+        goto(`/listKaryawan/detail/${perner}`); // Navigasi ke halaman detail
     };
   
     // Filter data karyawan berdasarkan pencarian
@@ -106,26 +106,27 @@
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          {#each filteredEmployees as employee}
-            <tr class="hover:bg-gray-100">
-              <td class="px-8 py-4 whitespace-nowrap">{employee.perner}</td>
-              <td class="px-8 py-4 whitespace-nowrap">{employee.nama}</td>
-              <td class="px-8 py-4 whitespace-nowrap">Rp {parseFloat(employee.take_home_pay).toLocaleString('id-ID')}</td>
-              <td class="px-8 py-4 whitespace-nowrap">{employee.unit}</td>
-              <td class="px-8 py-4 whitespace-nowrap">{employee.sub_unit}</td>
-              <td class="px-8 py-4 whitespace-nowrap">{employee.posisi_pekerjaan}</td>
-              <td class="px-8 py-4 whitespace-nowrap">{employee.sumber_anggaran}</td>
-              <td class="px-8 py-4 whitespace-nowrap">
-                <button
-                  on:click={() => navigateToDetail(employee.perner)}
-                  class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
-                >
-                  Detail
-                </button>
-              </td>
-            </tr>
-          {/each}
-        </tbody>
+            {#each filteredEmployees as employee}
+              <tr class="hover:bg-gray-100">
+                <td class="px-8 py-4 whitespace-nowrap">{employee.perner}</td>
+                <td class="px-8 py-4 whitespace-nowrap">{employee.nama}</td>
+                <td class="px-8 py-4 whitespace-nowrap">Rp {parseFloat(employee.take_home_pay).toLocaleString('id-ID')}</td>
+                <td class="px-8 py-4 whitespace-nowrap">{employee.unit}</td>
+                <td class="px-8 py-4 whitespace-nowrap">{employee.sub_unit}</td>
+                <td class="px-8 py-4 whitespace-nowrap">{employee.posisi_pekerjaan}</td>
+                <td class="px-8 py-4 whitespace-nowrap">{employee.sumber_anggaran}</td>
+                <td class="px-8 py-4 whitespace-nowrap">
+                  <button
+                    on:click={() => navigateToDetail(employee.perner)}
+                    class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                  >
+                    Detail
+                  </button>
+                </td>
+              </tr>
+            {/each}
+          </tbody>
+          
       </table>
     {/if}
   </div>
