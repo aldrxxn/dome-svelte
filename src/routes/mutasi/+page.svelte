@@ -221,7 +221,12 @@
                             {mutasi.status_mutasi}
                         </td>
                         <td class="px-8 py-4 flex gap-2">
-                            <button class="text-blue-600 hover:text-blue-800">Detail</button>
+                            <button
+                                class="text-blue-600 hover:text-blue-800"
+                                on:click={() => goto(`/mutasi/detail/${mutasi.perner}`)}
+                            >
+                                Detail
+                            </button>
                         </td>
                     </tr>
                     {/each}

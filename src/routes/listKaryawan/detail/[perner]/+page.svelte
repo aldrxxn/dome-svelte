@@ -92,7 +92,7 @@
         <div class="flex justify-normal items-center mb-4">
           <h2 class="text-xl font-bold mr-4">Detail Pekerjaan</h2>
           <span class="p-4 py-1 bg-[#1CB993] text-white rounded-lg">
-            Aktif
+            {employee.status_karyawan}
           </span>
         </div>
   
