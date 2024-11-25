@@ -4,8 +4,6 @@
     import BgHeader from '../../assets/BgHeader.png';
     import notificationIcon from '../../assets/notif.svg';
     import userIcon from '../../assets/profil.png';
-    import EyeIcon from "../../assets/EyeIcon.svg";
-    import TrashIcon from "../../assets/TrashIcon.svg";
     import PlusIcon from "../../assets/Plus.svg";
     import { goto } from '$app/navigation'; // Import fungsi untuk navigasi
 
@@ -185,8 +183,6 @@
     </div>
     {/if}
 
-    
-
 
         <div>
             <input
@@ -222,8 +218,8 @@
                         </td>
                         <td class="px-8 py-4 flex gap-2">
                             <button
-                                class="text-blue-600 hover:text-blue-800"
-                                on:click={() => goto(`/mutasi/detail/${mutasi.perner}`)}
+                            class="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700"
+                            on:click={() => goto(`/mutasi/detail/${mutasi.perner}`)}
                             >
                                 Detail
                             </button>

@@ -1,24 +1,25 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { page } from "$app/stores"; // Untuk mengambil params dari URL
+    import { page } from "$app/stores";
+    import { goto } from '$app/navigation'; // Import fungsi untuk navigasi
 
-    let karyawanId: string; // Nama karyawan dari URL
-    let karyawanData = null; // Data karyawan yang diambil dari API
-    let isLoading = true; // Status loading
-    let errorMessage = ""; // Pesan error
 
-    // Form mutasi
+    let karyawanId: string;
+    let karyawanData = null;
+    let isLoading = true;
+    let errorMessage = "";
+
     let mutasiForm = {
         unit_baru: "",
         sub_unit_baru: "",
-        kota_baru: "",
         posisi_baru: "",
     };
 
-    // Ambil parameter nama dari URL
+    let dropdownData = [];
+    let subUnits = []; // Subunit sesuai unit yang dipilih
+
     $: karyawanId = $page.params.nama;
 
-    // Fetch data karyawan dari backend
     async function fetchKaryawanData() {
         try {
             const token = localStorage.getItem("token");
@@ -45,7 +46,7 @@
             if (!response.ok) throw new Error(`Gagal mengambil data: ${response.statusText}`);
 
             const data = await response.json();
-            karyawanData = data[0] || null; // Pastikan hanya mengambil objek pertama jika API mengembalikan array
+            karyawanData = data[0] || null;
         } catch (error) {
             errorMessage = error.message;
         } finally {
@@ -53,10 +54,27 @@
         }
     }
 
-    // Submit form mutasi
+    async function fetchDropdownData() {
+        try {
+            const response = await fetch("https://dome-backend-5uxq.onrender.com/dropdown");
+            if (!response.ok) throw new Error("Gagal mengambil data dropdown.");
+
+            dropdownData = await response.json();
+        } catch (error) {
+            errorMessage = error.message;
+        }
+    }
+
+    function updateSubUnits() {
+        const selectedUnit = dropdownData.find((unit) => unit.unit_baru === mutasiForm.unit_baru);
+        subUnits = selectedUnit ? selectedUnit.sub_unit_baru : [];
+        mutasiForm.sub_unit_baru = ""; // Reset pilihan sub unit saat unit berubah
+    }
+
     async function submitMutasiForm(event: Event) {
         event.preventDefault();
-        errorMessage = ""; // Reset error message
+        errorMessage = "";
+
         try {
             const token = localStorage.getItem("token");
             if (!token) {
@@ -69,22 +87,20 @@
                 return;
             }
 
-            // Validasi input
             if (!mutasiForm.unit_baru || !mutasiForm.sub_unit_baru || !mutasiForm.posisi_baru) {
                 errorMessage = "Semua field mutasi wajib diisi.";
                 return;
             }
 
-            // Payload sesuai dengan API
             const payload = {
-                id: null, // ID dibiarkan null jika dibuat otomatis oleh backend
+                id: null,
                 perner: karyawanData.perner,
                 nama: karyawanData.nama,
                 unit_baru: mutasiForm.unit_baru,
                 sub_unit_baru: mutasiForm.sub_unit_baru,
                 posisi_baru: mutasiForm.posisi_baru,
-                status_mutasi: "pending", // Default status
-                created_at: new Date().toISOString(), // Format waktu saat ini
+                status_mutasi: "pending",
+                created_at: new Date().toISOString(),
             };
 
             const response = await fetch(`https://dome-backend-5uxq.onrender.com/mutasi`, {
@@ -96,23 +112,22 @@
                 body: JSON.stringify(payload),
             });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error("Response Error:", errorData); // Debugging
-                throw new Error(errorData.message || `Gagal menyimpan data mutasi: ${response.statusText}`);
-            }
-
-            alert("Mutasi berhasil disimpan!");
+            if (!response.ok) throw new Error("Gagal menyimpan data mutasi.");
         } catch (error) {
             errorMessage = error.message;
         }
     }
 
-    // Fetch data karyawan saat komponen dimuat
     onMount(() => {
         fetchKaryawanData();
+        fetchDropdownData();
     });
+
+    function handleClick() {
+        goto('/mutasi', { replaceState: true, invalidateAll: true });
+    }
 </script>
+
 
 <div class="p-6 bg-white rounded-lg shadow-md">
     <!-- Header -->
@@ -194,21 +209,31 @@
                     <form on:submit={submitMutasiForm}>
                         <div class="mb-4">
                             <label for="unit" class="block text-sm font-medium text-gray-500">Unit Baru</label>
-                            <input
+                            <select
                                 id="unit"
-                                type="text"
                                 bind:value={mutasiForm.unit_baru}
+                                on:change={updateSubUnits}
                                 class="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100 focus:outline-none focus:ring focus:ring-blue-500"
-                            />
+                            >
+                                <option value="" disabled>Pilih Unit Baru</option>
+                                {#each dropdownData as unit}
+                                    <option value={unit.unit_baru}>{unit.unit_baru}</option>
+                                {/each}
+                            </select>
                         </div>
+                        
                         <div class="mb-4">
                             <label for="subUnit" class="block text-sm font-medium text-gray-500">Sub Unit Baru</label>
-                            <input
+                            <select
                                 id="subUnit"
-                                type="text"
                                 bind:value={mutasiForm.sub_unit_baru}
                                 class="w-full px-4 py-2 mt-2 border rounded-md bg-gray-100 focus:outline-none focus:ring focus:ring-blue-500"
-                            />
+                            >
+                                <option value="" disabled>Pilih Sub Unit Baru</option>
+                                {#each subUnits as subUnit}
+                                    <option value={subUnit}>{subUnit}</option>
+                                {/each}
+                            </select>
                         </div>
                         <div class="mb-4">
                             <label for="posisi" class="block text-sm font-medium text-gray-500">Posisi Baru</label>
@@ -220,7 +245,8 @@
                             />
                         </div>
                         <div class="flex justify-end">
-                            <button
+                            <button on:click={handleClick}
+
                                 type="submit"
                                 class="px-4 py-2 text-white bg-blue-700 rounded-lg hover:bg-blue-800"
                             >

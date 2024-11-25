@@ -8,7 +8,7 @@
     { label: 'Home', link: '/dashboard' },
     { label: 'List Karyawan', link: '/listKaryawan' },
     { label: 'Mutasi', link: '/mutasi' },
-    { label: 'Settings', link: '/dashboard/settings' },
+    // { label: 'Settings', link: '/dashboard/settings' },
   ];
 
   // Fungsi logout

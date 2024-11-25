@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { page } from "$app/stores";
+    import { page } from "$app/stores"; // Untuk mendapatkan params dari URL
 
     let karyawanId: string; // ID Karyawan dari URL
     let mutasiData = null; // Data mutasi karyawan
@@ -49,51 +49,145 @@
     onMount(() => {
         fetchMutasiDetail();
     });
+
+    // Tentukan status alert berdasarkan status mutasi
+    let alertStatus = "warning"; // Default status alert
+
+    $: {
+        if (mutasiData?.status_mutasi === "Diproses") {
+            alertStatus = "warning";
+        } else if (mutasiData?.status_mutasi === "Disetujui") {
+            alertStatus = "success";
+        } else if (mutasiData?.status_mutasi === "Ditolak") {
+            alertStatus = "danger";
+        }
+    }
+
+    // Konfigurasi alert berdasarkan status
+    let alertClasses = "bg-[#FEFCE8] text-[#854D0E]";
+    let title = "";
+    let description = "";
+
+    $: {
+        if (alertStatus === "warning") {
+            title = "Usulan Mutasi Diperiksa!";
+            description = "Harap Menunggu Proses Verifikasi";
+            alertClasses = "bg-[#FEFCE8] text-[#854D0E]";
+        } else if (alertStatus === "success") {
+            title = "Usulan Disetujui";
+            description = "Usulan Mutasi Anda Telah Disetujui oleh Atasan";
+            alertClasses = "bg-[#ECFDF5] text-[#065F46]";
+        } else if (alertStatus === "danger") {
+            title = "Usulan Mutasi Ditolak oleh Atasan";
+            description = "Periksa Kembali Data-data";
+            alertClasses = "bg-[#FEE2E2] text-[#991B1B]";
+        }
+    }
 </script>
 
 <div class="p-6 bg-white rounded-lg shadow-md">
     <!-- Header -->
-    <div class="flex items-center justify-between mb-6">
-        <button class="text-gray-600 hover:text-gray-800" on:click={() => history.back()}>
-            ← Kembali
-        </button>
-        <h1 class="text-xl font-bold text-blue-900">Detail Mutasi Karyawan</h1>
+    <div class="items-center mb-6">
+        <div class="flex flex-row mb-6">
+            <div class="flex items-center">
+                <button class="text-gray-600 hover:text-gray-800" on:click={() => history.back()}>
+                    ←
+                </button>
+                <h1 class="ml-4 text-xl font-bold text-blue-900">Detail Karyawan</h1>
+            </div>
+        </div>
+        {#if isLoading}
+            <p class="text-gray-500">Memuat data...</p>
+        {:else if errorMessage}
+            <div class="p-4 bg-red-100 text-red-500 border border-red-300 rounded">
+                <p>Error: {errorMessage}</p>
+            </div>
+        {:else if mutasiData}
+            <div>
+                <!-- Informasi Karyawan -->
+                <div class="flex items-center justify-normal">
+                    <h2 class="text-2xl font-bold text-gray-800">{mutasiData.nama}</h2>
+                    <span
+                        class="ml-4 px-3 py-1 text-red-500 bg-red-100 rounded-full text-sm font-semibold"
+                    >
+                        {mutasiData.unit}
+                    </span>
+                </div>
+
+                <div>
+                    <p class="mt-4 text-gray-500">
+                        Perner: <span class="text-red-500 font-bold">{mutasiData.perner}</span>
+                    </p>
+                </div>
+            </div>
+        {/if}
     </div>
 
-    <!-- Loading dan Error Handling -->
-    {#if isLoading}
-        <p class="text-gray-500">Memuat data...</p>
-    {:else if errorMessage}
-        <div class="p-4 bg-red-100 text-red-500 border border-red-300 rounded">
-            <p>Error: {errorMessage}</p>
-        </div>
-    {:else if mutasiData}
-        <!-- Tampilkan Detail Mutasi -->
-        <div>
-            <h2 class="text-2xl font-bold text-gray-800">{mutasiData.nama}</h2>
-            <p class="text-gray-500 mt-2">Perner: <span class="text-red-500">{mutasiData.perner}</span></p>
-            <p class="text-gray-500 mt-2">Status: <span class="font-semibold text-yellow-500">{mutasiData.status_mutasi}</span></p>
-        </div>
-
-        <!-- Detail Lama -->
-        <div class="mt-6 p-4 bg-gray-100 rounded-lg">
-            <h3 class="text-lg font-bold mb-2 text-blue-800">Detail Lama</h3>
-            <p>Unit: {mutasiData.unit}</p>
-            <p>Sub Unit: {mutasiData.sub_unit}</p>
-            <p>Kota: {mutasiData.kota}</p>
-            <p>Posisi: {mutasiData.posisi_pekerjaan}</p>
+    {#if mutasiData}
+        <!-- Status Mutasi -->
+        <div class="px-6">
+            <div class="flex justify-normal items-center mb-4">
+                <h2 class="text-xl font-bold mr-4">Status Mutasi</h2>
+                <span class={`p-4 py-1 rounded-lg font-bold ${alertStatus === "warning" ? "bg-yellow-500" : alertStatus === "success" ? "bg-green-500" : "bg-red-500"} text-white`}>
+                    {mutasiData.status_mutasi}
+                </span>
+            </div>
+            <!-- Alert -->
+            <div class={`rounded-lg p-4 flex items-start border-none ${alertClasses}`}>
+                <div class="ml-3">
+                    <p class="font-bold mb-3">{title}</p>
+                    <p class="font-medium">{description}</p>
+                </div>
+            </div>
         </div>
 
-        <!-- Detail Baru -->
-        <div class="mt-6 p-4 bg-white rounded-lg border-2 border-gray-300">
-            <h3 class="text-lg font-bold mb-2 text-green-800">Detail Baru</h3>
-            <p>Unit Baru: {mutasiData.unit_baru}</p>
-            <p>Sub Unit Baru: {mutasiData.sub_unit_baru}</p>
-            <p>Posisi Baru: {mutasiData.posisi_baru}</p>
-        </div>
+        <!-- Detail Pekerjaan dan Mutasi -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+            <!-- Informasi Pekerjaan Saat Ini -->
+            <div>
+                <h3 class="text-lg font-bold text-red-500 mb-4">Informasi Pekerjaan Saat Ini</h3>
+                <div class="grid gap-4">
+                    <div>
+                        <p class="text-gray-500">Unit</p>
+                        <p class="font-semibold">{mutasiData.unit}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Sub Unit</p>
+                        <p class="font-semibold">{mutasiData.sub_unit}</p>
+                    </div>                    
+                    <div>
+                        <p class="text-gray-500">NIK Atasan</p>
+                        <p class="font-semibold">{mutasiData.nik_atasan}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Nama Atasan</p>
+                        <p class="font-semibold">{mutasiData.nama_atasan}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Posisi</p>
+                        <p class="font-semibold">{mutasiData.posisi_pekerjaan}</p>
+                    </div>
+                </div>
+            </div>
 
-        <p class="mt-6 text-gray-500 text-sm">
-            Dibuat pada: {new Date(mutasiData.created_at).toLocaleString()}
-        </p>
+            <!-- Mutasi -->
+            <div>
+                <h3 class="text-lg font-bold text-red-500 mb-4">Mutasi</h3>
+                <div class="grid gap-4">
+                    <div>
+                        <p class="text-gray-500">Unit Baru</p>
+                        <p class="font-semibold bg-gray-100 px-3 py-2 rounded-md">{mutasiData.unit_baru}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Sub Unit Baru</p>
+                        <p class="font-semibold bg-gray-100 px-3 py-2 rounded-md">{mutasiData.sub_unit_baru}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-500">Posisi Baru</p>
+                        <p class="font-semibold bg-gray-100 px-3 py-2 rounded-md">{mutasiData.posisi_baru}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     {/if}
 </div>
